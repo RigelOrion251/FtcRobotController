@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Math.abs;
+
 import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -64,6 +66,7 @@ public class testBed_LV_Linear extends LinearOpMode {
 
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
+    private int position = 0;
 
     //    private DcMotor rightDrive = null;
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
@@ -95,6 +98,9 @@ public class testBed_LV_Linear extends LinearOpMode {
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         lift.setDirection(DcMotor.Direction.FORWARD);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setTargetPosition(0);
+        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //        rightDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
@@ -105,7 +111,7 @@ public class testBed_LV_Linear extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Setup a variable for each drive wheel to save power level for telemetry
-            double liftPower;
+            double liftPower = gamepad1.left_stick_y;
          /*
                double rightPower;
              Choose to drive using either Tank Mode, or POV Mode
@@ -117,18 +123,24 @@ public class testBed_LV_Linear extends LinearOpMode {
                         rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
             */
 
-            liftPower = gamepad1.left_stick_y;
+            if (abs(liftPower) > .1) {
+                // Tank Mode uses one stick to control each wheel.
+                // - This requires no math, but it is hard to drive forward slowly and keep straight.
+                // leftPower  = -gamepad1.left_stick_y ;
+                // rightPower = -gamepad1.right_stick_y ;
 
-            // Tank Mode uses one stick to control each wheel.
-            // - This requires no math, but it is hard to drive forward slowly and keep straight.
-            // leftPower  = -gamepad1.left_stick_y ;
-            // rightPower = -gamepad1.right_stick_y ;
-
-            // Send calculated power to wheels
-            lift.setPower(liftPower);
-//            rightDrive.setPower(rightPower);
-
-            int position = lift.getCurrentPosition();
+                // Send calculated power to wheels
+                lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                lift.setPower(liftPower);
+                position = lift.getCurrentPosition();
+                lift.setTargetPosition(position);
+                // rightDrive.setPower(rightPower);
+            }
+            else
+            {
+                lift.setPower(0.2);
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime);
