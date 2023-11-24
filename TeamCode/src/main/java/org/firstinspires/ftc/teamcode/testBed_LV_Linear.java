@@ -33,6 +33,7 @@ import static java.lang.Math.abs;
 
 import android.annotation.SuppressLint;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -62,6 +63,7 @@ import java.util.List;
  */
 
 @TeleOp(name="Test Bed Lift/Vision: Linear OpMode", group="Linear OpMode")
+@Disabled
 public class testBed_LV_Linear extends LinearOpMode {
 
     // Declare OpMode members.
