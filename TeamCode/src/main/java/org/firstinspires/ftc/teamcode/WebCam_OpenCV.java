@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Mat;
@@ -15,6 +16,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+
+@TeleOp(name="Webcam Open_CV: Linear TeleOpMode", group="Linear OpMode")
 public class WebCam_OpenCV extends LinearOpMode
 {
     OpenCvWebcam webcam;
@@ -194,8 +197,8 @@ public class WebCam_OpenCV extends LinearOpMode
             Imgproc.rectangle(
                     input,
                     new Point(
-                            input.cols()/4,
-                            input.rows()/4),
+                            input.cols()/4.0,
+                            input.rows()/4.0),
                     new Point(
                             input.cols()*(3f/4f),
                             input.rows()*(3f/4f)),
