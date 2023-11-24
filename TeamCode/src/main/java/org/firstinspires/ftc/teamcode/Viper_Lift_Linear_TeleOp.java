@@ -87,16 +87,40 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
             // Get power level for the lift and telemetry
             double liftPower = -gamepad1.left_stick_y;
 
+            if (gamepad1.dpad_down && gamepad1.y)
+            {
+                position = 3000;
+                lift.setTargetPosition(position);
+            }
+
+            if (gamepad1.dpad_down && gamepad1.b)
+            {
+                position = 2000;
+                lift.setTargetPosition(position);
+            }
+
+            if (gamepad1.dpad_down && gamepad1.a)
+            {
+                position = 1000;
+                lift.setTargetPosition(position);
+            }
+
+            if (gamepad1.dpad_down && gamepad1.x)
+            {
+                position = 50;
+                lift.setTargetPosition(position);
+            }
+
             int top_stop = 3400;
             int bottom_stop = 50;
             position = motor_setPowerNHold
-                           (
-                               lift,
-                               liftPower,
-                               position,
-                                   top_stop,
-                                   bottom_stop
-                           );
+            (
+                lift,
+                liftPower,
+                position,
+                top_stop,
+                bottom_stop
+            );
 
 
             // Show the elapsed game time and lift power and position.
