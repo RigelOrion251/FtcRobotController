@@ -1,9 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.opencv.core.Mat.zeros;
+import static org.opencv.imgproc.Imgproc.ADAPTIVE_THRESH_MEAN_C;
+import static org.opencv.imgproc.Imgproc.COLOR_RGB2GRAY;
+import static org.opencv.imgproc.Imgproc.COLOR_RGBA2BGR;
+import static org.opencv.imgproc.Imgproc.COLOR_RGBA2GRAY;
+import static org.opencv.imgproc.Imgproc.THRESH_BINARY;
+import static org.opencv.imgproc.Imgproc.adaptiveThreshold;
 import static org.opencv.imgproc.Imgproc.cvtColor;
-
-import android.renderscript.Element;
+import static org.opencv.imgproc.Imgproc.medianBlur;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -35,6 +40,8 @@ public class SamplePipeline extends OpenCvPipeline
     OpenCvWebcam webcam;
     private Mat srcGray = new Mat();
     private Mat dst = new Mat();
+    private Mat dstNorm = new Mat();
+    private Mat dstNormScaled = new Mat();
     int imgType = 0;
 
 //    private Mat dstNorm = new Mat();
@@ -50,10 +57,9 @@ public class SamplePipeline extends OpenCvPipeline
     public void init(Mat firstFrame)
     {
         srcGray = firstFrame.clone();
-        dst = firstFrame.clone();
-        dst = zeros(firstFrame.size(), CvType.CV_8UC1);
-        srcGray = zeros(firstFrame.size(), CvType.CV_8UC1);
-
+        dst = zeros(firstFrame.size(), CvType.CV_32FC1);
+        dstNorm = zeros(firstFrame.size(), CvType.CV_32FC1);
+        dstNormScaled = zeros(firstFrame.size(), CvType.CV_32FC1);
     }
 
     public int getImgType()
@@ -81,25 +87,28 @@ public class SamplePipeline extends OpenCvPipeline
          * it to another Mat.
          */
 
-        imgType = CvType.CV_32F;
-        cvtColor(input, dst, 7);
-        int blockSize = 2;
-        int apertureSize = 3;
-        double k = 0.04;
-/*        Imgproc.cornerHarris(srcGray, dst, blockSize, apertureSize, k);
-            Core.normalize(dst, dstNorm, 0, 255, Core.NORM_MINMAX);
-            Core.convertScaleAbs(dstNorm, dstNormScaled);
-            float[] dstNormData = new float[(int) (dstNorm.total() * dstNorm.channels())];
-            dstNorm.get(0, 0, dstNormData);
-            for (int i = 0; i < dstNorm.rows(); i++) {
-                for (int j = 0; j < dstNorm.cols(); j++) {
-                    int threshold = 200;
-                    if ((int) dstNormData[i * dstNorm.cols() + j] > threshold) {
-                        Imgproc.circle(dstNormScaled, new Point(j, i), 5, new Scalar(0), 2, 8, 0);
-                    }
+        cvtColor(input, srcGray, COLOR_RGB2GRAY);
+        imgType = dst.type();
+//        medianBlur(srcGray, dst, 5);
+//        adaptiveThreshold(dst, srcGray, 600, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 9, 9);
+//        int blockSize = 2;
+//        int apertureSize = 3;
+//        double k = 0.04;
+//        Imgproc.cornerEigenValsAndVecs(srcGray, dst, 2, 3);
+        Imgproc.cornerHarris(srcGray, dst, 2, 3,.04);
+        Core.normalize(dst, dstNorm, 0, 255, Core.NORM_MINMAX);
+        Core.convertScaleAbs(dstNorm, dstNormScaled);
+        float[] dstNormData = new float[(int) (dstNorm.total() * dstNorm.channels())];
+        dstNorm.get(0, 0, dstNormData);
+        for (int i = 0; i < dstNorm.rows(); i++) {
+            for (int j = 0; j < dstNorm.cols(); j++) {
+                int threshold = 125;
+                if ((int) dstNormData[i * dstNorm.cols() + j] > threshold) {
+                    Imgproc.circle(input, new Point(j, i), 5, new Scalar(255,0,0), 2, 8, 0);
                 }
             }
-*/
+        }
+
         /*
          * Draw a simple box around the middle 1/2 of the entire frame
          */
@@ -119,7 +128,7 @@ public class SamplePipeline extends OpenCvPipeline
               tapped, please see {@link PipelineStageSwitchingExample}
              */
 
-        return dst;
+        return input;
     }
 
     @Override
