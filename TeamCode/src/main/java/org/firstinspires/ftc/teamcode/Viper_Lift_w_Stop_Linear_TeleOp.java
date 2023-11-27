@@ -52,72 +52,19 @@ import com.qualcomm.robotcore.util.RobotLog;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-public class Setter
-{
-    int position;
-    Boolean resetCycleStart;
-    int lastPosition;
-
-    Setter(int _position, Boolean _resetCycleStart, int _lastPosition)
-    {
-        position = _position;
-        resetCycleStart = _resetCycleStart;
-        lastPosition = _lastPosition;
-    };
-
-    public void equalTo (Setter o)
-    {
-        o.set_Position(position);
-        o.set_ResetCycleStart(resetCycleStart);
-        o.set_LastPosition(lastPosition);
-    };
-
-    public int get_Position()
-    {
-        return position;
-    };
-
-    public Boolean get_ResetCycleStart()
-    {
-        return resetCycleStart;
-    };
-
-    public int get_LastPosition()
-    {
-        return lastPosition;
-    };
-
-    public void set_Position(int _position)
-    {
-        position = _position;
-    };
-
-    public void set_ResetCycleStart(Boolean _resetCycleStart)
-    {
-        resetCycleStart = _resetCycleStart;
-    };
-
-    public void set_LastPosition(int _lastPosition)
-    {
-        lastPosition = _lastPosition;
-    };
-
-}
-
-@TeleOp(name="Viper Lift: Linear TeleOpMode", group="Linear OpMode")
-public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
+@TeleOp(name="Viper Lift with Bottom Stop: Linear TeleOpMode", group="Linear OpMode")
+public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
 
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     private int position = 0;
-    private Setter resetSettings;
+    private boolean resetCycleStart = Boolean.TRUE;
     private int last_position = 500;
-    private Boolean reset_cycle_start = Boolean.TRUE;
 
     @Override
     public void runOpMode() {
 
-        resetSettings = new Setter(position, Boolean.TRUE, last_position);
+        Setter resetSettings = new Setter(position, Boolean.TRUE, 500);
         telemetry.addData("Status", "Initialized CV");
         telemetry.update();
 
@@ -170,13 +117,8 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
             }
 
             int top_stop = 3400;
-            int bottom_stop = 50;
-            resetSettings.set_Position(position);
-            resetSettings.set_ResetCycleStart(reset_cycle_start);
-            resetSettings.set_LastPosition(last_position);
-            resetSettings.equalTo
-            (
-                motor_setPowerNHold
+            int bottom_stop = 150;
+            motor_setPowerNHold
                 (
                     lift,
                     liftPower,
@@ -184,12 +126,11 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
                     bottom_stop,
                     bottom,
                     resetSettings
-                )
-            );
+                ).equalTo(resetSettings);
 
             // Show the elapsed game time and lift power and position.
             telemetry.addData("Status", "Run Time: " + runtime);
-            RobotLog.d("%f, %f, %d, %d", runtime.milliseconds(), liftPower, position);
+            RobotLog.d("%f, %f, %d, %b", runtime.milliseconds(), liftPower, position, resetCycleStart);
             telemetry.addData("Motors", "Power (%.2f)", liftPower);
 
             // Push telemetry to the Driver Station.
@@ -210,11 +151,7 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
         Setter _resetSettings
     ) {
 
-        int position = _resetSettings.get_Position();
-        int last_position = _resetSettings.get_LastPosition();
-        Boolean resetCycleStart = _resetSettings.get_ResetCycleStart();
         Setter returnSettings;
-
 
         // Check that the top or bottom stops have not been exceeded
         if
@@ -236,10 +173,17 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
             (resetCycleStart)
         )
         {
-            Boolean Stalled = Boolean.FALSE;
+            boolean Stalled = Boolean.FALSE;
+
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            sleep(1000);
+
+            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
             while (opModeIsActive() && (!bottom.isPressed()) && !Stalled) {
-                power = -0.1;
+                power = -0.001;
+                motor.setPower(power);
                 position = motor.getCurrentPosition();
 
                 if (position >= last_position)
@@ -257,7 +201,7 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
             {
                 motor.setTargetPosition(5);
                 motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                sleep(500)
+                sleep(500);
             }
 
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -265,11 +209,11 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
             motor.setTargetPosition(position);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             last_position = top_stop;
-            resetCycleStart = Boolean.FALSE
+            resetCycleStart = Boolean.FALSE;
         }
         else
         {
-            resetCycleStart = Boolean.TRUE
+            resetCycleStart = Boolean.TRUE;
         }
 
         // Check the Hold Condition (power level < 0.1)
