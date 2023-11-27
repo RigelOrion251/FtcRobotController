@@ -60,6 +60,7 @@ public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
     private int position = 0;
     private boolean resetCycleStart = Boolean.TRUE;
     private int last_position = 500;
+    private boolean atBottom = Boolean.FALSE;
 
     @Override
     public void runOpMode() {
@@ -169,8 +170,17 @@ public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
             (position < bottom_stop)
             &&
             (power < 0.0)
+        )
+        {
+            power = 0.0;
+            atBottom = Boolean.TRUE;
+        }
+
+        if
+        (
+            (atBottom)
             &&
-            (resetCycleStart)
+            (gamepad1.dpad_down)
         )
         {
             boolean Stalled = Boolean.FALSE;
