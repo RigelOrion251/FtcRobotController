@@ -143,6 +143,11 @@ public class WebcamExample extends LinearOpMode
              * when it will be automatically stopped for you) *IS* supported. The "if" statement
              * below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
              */
+            if(gamepad1.b)
+            {
+                onViewportTapped();
+            }
+
             if(gamepad1.a)
             {
                 /*
