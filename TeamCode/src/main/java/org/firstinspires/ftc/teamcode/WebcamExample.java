@@ -99,8 +99,13 @@ public class WebcamExample extends LinearOpMode
                  * For a front facing camera, rotation is defined assuming the user is looking at the screen.
                  * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
                  * away from the user.
+                 *
+                 * Acceptable Resolutions are:
+                 * [640x480], [160x120], [176x144], [320x176], [320x240], [352x288], [432x240], [544x288],
+                 * [640x360], [752x416], [800x448], [800x600], [864x480], [960x544], [960x720], [1024x576],
+                 * [1184x656], [1280x720], [1280x960]
                  */
-                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(360, 270, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
