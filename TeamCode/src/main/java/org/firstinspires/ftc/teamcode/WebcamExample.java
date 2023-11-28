@@ -105,7 +105,7 @@ public class WebcamExample extends LinearOpMode
                  * [640x360], [752x416], [800x448], [800x600], [864x480], [960x544], [960x720], [1024x576],
                  * [1184x656], [1280x720], [1280x960]
                  */
-                webcam.startStreaming(360, 270, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming(800, 600, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
