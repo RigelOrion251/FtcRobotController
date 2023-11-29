@@ -25,8 +25,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -103,6 +105,8 @@ public class FieldNavPipelineDebug extends LinearOpMode
         Mat srcBlur = new Mat();
         Mat detectedEdges = new Mat();
         Mat maskMat = new Mat();
+        int imageType;
+        Size imageSize;
 
         enum Stage
         {
@@ -137,21 +141,20 @@ public class FieldNavPipelineDebug extends LinearOpMode
         }
 
         @Override
-        public Mat processFrame(Mat input)
-        {
-//            contoursList.clear();
+        public Mat processFrame(Mat input) {
 
             /*
              * This pipeline finds the contours of yellow blobs such as the Gold Mineral
              * from the Rover Ruckus game.
              */
+            imageType = maskMat.type();
+            imageSize = maskMat.size();
+            maskMat.setTo(Scalar.all(0));
             Imgproc.cvtColor(input, srcGray, Imgproc.COLOR_RGB2GRAY);
             Imgproc.blur(srcGray, srcBlur, BLUR_SIZE);
             int lowThresh = 0;
             Imgproc.Canny(srcBlur, detectedEdges, lowThresh, lowThresh * RATIO, KERNEL_SIZE, false);
-            detectedEdges.copyTo(maskMat, detectedEdges);
-
-//            Imgproc.drawContours(contoursOnFrameMat, contoursList, -1, new Scalar(0, 0, 255), 3, 8);
+            input.copyTo(maskMat, detectedEdges);
 
             switch (stageToRenderToViewport)
             {
@@ -190,7 +193,7 @@ public class FieldNavPipelineDebug extends LinearOpMode
         public int getNumContoursFound()
         {
 //            return numContoursFound;
-            return 5;
+            return CvType.CV_8UC4;
         }
     }
 }
