@@ -12,7 +12,7 @@
  * copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -98,9 +98,9 @@ public class FieldNavPipelineDebug extends LinearOpMode
      */
     static class StageSwitchingPipeline extends OpenCvPipeline
     {
-        private static final int RATIO = 3;
+        private static final int RATIO = 2;
         private static final int KERNEL_SIZE = 3;
-        private static final Size BLUR_SIZE = new Size(3,3);
+        private static final Size BLUR_SIZE = new Size(5,5);
         Mat srcGray = new Mat();
         Mat srcBlur = new Mat();
         Mat detectedEdges = new Mat();
@@ -152,8 +152,8 @@ public class FieldNavPipelineDebug extends LinearOpMode
             maskMat.setTo(Scalar.all(0));
             Imgproc.cvtColor(input, srcGray, Imgproc.COLOR_RGB2GRAY);
             Imgproc.blur(srcGray, srcBlur, BLUR_SIZE);
-            int lowThresh = 0;
-            Imgproc.Canny(srcBlur, detectedEdges, lowThresh, lowThresh * RATIO, KERNEL_SIZE, false);
+            int lowThresh = 50;
+            Imgproc.Canny(srcBlur, detectedEdges, lowThresh, lowThresh*RATIO, KERNEL_SIZE, false);
             input.copyTo(maskMat, detectedEdges);
 
             switch (stageToRenderToViewport)
@@ -176,11 +176,6 @@ public class FieldNavPipelineDebug extends LinearOpMode
                 case MASK:
                 {
                     return maskMat;
-                }
-
-                case RAW_IMAGE:
-                {
-                    return input;
                 }
 
                 default:
