@@ -101,12 +101,12 @@ public class FieldNavPipelineDebug extends LinearOpMode
      */
     static class StageSwitchingPipeline extends OpenCvPipeline
     {
-        private int maxCorners = 23;
+        private int maxCorners = 230;
         double qualityLevel = 0.01;
         double minDistance = 10;
         int blockSize = 3, gradientSize = 3;
         boolean useHarrisDetector = false;
-        double k = 0.04;
+        double k = 0.4;
         private static final int RATIO = 2;
         private static final int KERNEL_SIZE = 3;
         private static final Size BLUR_SIZE = new Size(5,5);
@@ -120,10 +120,10 @@ public class FieldNavPipelineDebug extends LinearOpMode
         Size imageSize;
         @SuppressWarnings("FieldMayBeFinal")
         private Random rng = new Random(12345);
-        Mat tempMat;
-        Point tempPoint;
-        Scalar tempScalar;
+        Mat tempMat = new Mat();
+        Point tempPoint = new Point();
         double[] colors = new double[3];
+        Scalar tempScalar = new Scalar(colors);
 
         enum Stage
         {
@@ -170,11 +170,13 @@ public class FieldNavPipelineDebug extends LinearOpMode
             imageSize = maskMat.size();
             maskMat.setTo(Scalar.all(0));
             tempMat.setTo(Scalar.all(0));
+            cornerMat.setTo(Scalar.all(0));
             Imgproc.cvtColor(input, srcGray, Imgproc.COLOR_RGB2GRAY);
             Imgproc.blur(srcGray, srcBlur, BLUR_SIZE);
             int lowThresh = 50;
             Imgproc.Canny(srcBlur, detectedEdges, lowThresh, lowThresh*RATIO, KERNEL_SIZE, false);
             input.copyTo(maskMat, detectedEdges);
+            input.copyTo(cornerMat, detectedEdges);
             Imgproc.goodFeaturesToTrack(srcGray, corners, maxCorners, qualityLevel, minDistance, tempMat,
                     blockSize, gradientSize, useHarrisDetector, k);
 
