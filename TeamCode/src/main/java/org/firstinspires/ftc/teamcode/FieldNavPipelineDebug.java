@@ -118,7 +118,12 @@ public class FieldNavPipelineDebug extends LinearOpMode
         MatOfPoint corners = new MatOfPoint();
         int imageType;
         Size imageSize;
+        @SuppressWarnings("FieldMayBeFinal")
         private Random rng = new Random(12345);
+        Mat tempMat;
+        Point tempPoint;
+        Scalar tempScalar;
+        double[] colors = new double[3];
 
         enum Stage
         {
@@ -164,20 +169,26 @@ public class FieldNavPipelineDebug extends LinearOpMode
             imageType = maskMat.type();
             imageSize = maskMat.size();
             maskMat.setTo(Scalar.all(0));
+            tempMat.setTo(Scalar.all(0));
             Imgproc.cvtColor(input, srcGray, Imgproc.COLOR_RGB2GRAY);
             Imgproc.blur(srcGray, srcBlur, BLUR_SIZE);
             int lowThresh = 50;
             Imgproc.Canny(srcBlur, detectedEdges, lowThresh, lowThresh*RATIO, KERNEL_SIZE, false);
             input.copyTo(maskMat, detectedEdges);
-            Imgproc.goodFeaturesToTrack(srcGray, corners, maxCorners, qualityLevel, minDistance, new Mat(),
+            Imgproc.goodFeaturesToTrack(srcGray, corners, maxCorners, qualityLevel, minDistance, tempMat,
                     blockSize, gradientSize, useHarrisDetector, k);
 
             int[] cornersData = new int[(int) (corners.total() * corners.channels())];
             corners.get(0, 0, cornersData);
             int radius = 4;
             for (int i = 0; i < corners.rows(); i++) {
-                Imgproc.circle(cornerMat, new Point(cornersData[i * 2], cornersData[i * 2 + 1]), radius,
-                        new Scalar(rng.nextInt(256), rng.nextInt(256), rng.nextInt(256)), Imgproc.FILLED);
+                tempPoint.x = cornersData[i * 2];
+                tempPoint.y = cornersData[i * 2 + 1];
+                colors[0] = rng.nextInt(256);
+                colors[1] = rng.nextInt(256);
+                colors[2] = rng.nextInt(256);
+                tempScalar.set(colors);
+                Imgproc.circle(cornerMat, tempPoint, radius, tempScalar, Imgproc.FILLED);
             }
 
             switch (stageToRenderToViewport)
