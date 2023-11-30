@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -43,6 +44,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
  * purposes. We also show how to get data from the pipeline to your OpMode.
  */
 @TeleOp
+@Disabled
 public class EdgeDetectionPipelineDebug extends LinearOpMode
 {
     OpenCvWebcam Webcam;
