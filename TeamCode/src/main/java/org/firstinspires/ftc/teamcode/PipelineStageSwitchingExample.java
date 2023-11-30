@@ -12,7 +12,7 @@
  * copies or substantial portions of the Software.
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -112,12 +112,12 @@ public class PipelineStageSwitchingExample extends LinearOpMode
         {
             YCbCr_CHAN2,
             THRESHOLD,
-            CONTOURS_OVERLAYED_ON_FRAME,
+            @SuppressWarnings("SpellCheckingInspection") CONTOURS_OVERLAYED_ON_FRAME,
             RAW_IMAGE,
         }
 
         private Stage stageToRenderToViewport = Stage.YCbCr_CHAN2;
-        private Stage[] stages = Stage.values();
+        private final Stage[] stages = Stage.values();
 
         @Override
         public void onViewportTapped()
@@ -171,11 +171,6 @@ public class PipelineStageSwitchingExample extends LinearOpMode
                 case CONTOURS_OVERLAYED_ON_FRAME:
                 {
                     return contoursOnFrameMat;
-                }
-
-                case RAW_IMAGE:
-                {
-                    return input;
                 }
 
                 default:
