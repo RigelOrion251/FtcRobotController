@@ -19,8 +19,8 @@ import java.util.Random;
  */
 
 public class ImgCornersPipelineDbg extends OpenCvPipeline {
-    private int maxCorners = 230;
-    double qualityLevel = 0.01;
+    private int maxCorners = 60;
+    double qualityLevel = 0.1;
     double minDistance = 10;
     int blockSize = 3, gradientSize = 3;
     boolean useHarrisDetector = false;
