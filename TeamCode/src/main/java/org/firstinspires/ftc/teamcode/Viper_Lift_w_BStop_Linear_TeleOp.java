@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.Math.abs;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -52,20 +54,17 @@ import com.qualcomm.robotcore.util.RobotLog;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Viper Lift with Bottom Stop: Linear TeleOpMode", group="Linear OpMode")
-public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
+@TeleOp(name="Viper Lift With Bottom Stop: Linear TeleOpMode", group="Linear OpMode")
+public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
 
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     private int position = 0;
-    private boolean resetCycleStart = Boolean.TRUE;
-    private int last_position = 500;
-    private boolean atBottom = Boolean.FALSE;
+    private boolean cycleStarted = FALSE;
 
     @Override
     public void runOpMode() {
 
-        Setter resetSettings = new Setter(position, Boolean.TRUE, 500);
         telemetry.addData("Status", "Initialized CV");
         telemetry.update();
 
@@ -73,7 +72,7 @@ public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         DcMotor lift = hardwareMap.get(DcMotor.class, "lift_motor");
-        TouchSensor bottom = hardwareMap.get(TouchSensor.class, "bottom_touch");
+        TouchSensor bottom_set_switch = hardwareMap.get(TouchSensor.class, "bottom_touch");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
@@ -118,21 +117,22 @@ public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
             }
 
             int top_stop = 3400;
-            int bottom_stop = 150;
-            motor_setPowerNHold
-                (
-                    lift,
-                    liftPower,
-                    top_stop,
-                    bottom_stop,
-                    bottom,
-                    resetSettings
-                ).equalTo(resetSettings);
+            int bottom_stop = 50;
+            cycleStarted = motor_setPowerNHold
+            (
+                lift,
+                liftPower,
+                cycleStarted,
+                bottom_set_switch,
+                top_stop,
+                bottom_stop
+            );
+            position = lift.getCurrentPosition();
 
             // Show the elapsed game time and lift power and position.
             telemetry.addData("Status", "Run Time: " + runtime);
-            RobotLog.d("%f, %f, %d, %b", runtime.milliseconds(), liftPower, position, resetCycleStart);
-            telemetry.addData("Motors", "Power (%.2f)", liftPower);
+            RobotLog.d("%f, %f, %d", runtime.milliseconds(), liftPower, position);
+            telemetry.addData("Motors", "test (%.2f)", liftPower);
 
             // Push telemetry to the Driver Station.
             telemetry.update();
@@ -142,100 +142,79 @@ public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
     /**
      * Add Power or Hold a motor in a position.
      */
-    private Setter motor_setPowerNHold
-    (
-        DcMotor motor,
-        double power,
-        int top_stop,
-        int bottom_stop,
-        TouchSensor bottom,
-        Setter _resetSettings
-    ) {
-
-        Setter returnSettings;
-
+    private boolean motor_setPowerNHold(DcMotor motor, double power, boolean cycleStarted, TouchSensor bottom_switch, int top_stop, int bottom_stop)
+    {
         // Check that the top or bottom stops have not been exceeded
         if
         (
-            (position > top_stop)
-            &&
-            (power > 0.0)
+            (
+                (motor.getCurrentPosition() > top_stop)
+                &&
+                (power > 0.0)
+            )
         )
         {
             power = 0.0;
+            cycleStarted = FALSE;
         }
 
         if
         (
-            (position < bottom_stop)
-            &&
-            (power < 0.0)
+            (
+                (motor.getCurrentPosition() < bottom_stop)
+                &&
+                (power < 0.0)
+            )
         )
         {
-            power = 0.0;
-            atBottom = Boolean.TRUE;
-        }
-
-        if
-        (
-            (atBottom)
-            &&
-            (gamepad1.dpad_down)
-        )
-        {
-            boolean Stalled = Boolean.FALSE;
-
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            sleep(1000);
-
-            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-            while (opModeIsActive() && (!bottom.isPressed()) && !Stalled) {
-                power = -0.001;
-                motor.setPower(power);
-                position = motor.getCurrentPosition();
-
-                if (position >= last_position)
-                {
-                    power = 0.0;
-                    Stalled = Boolean.TRUE;
-                }
-
-                last_position = position;
-            }
-
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-            if (Stalled)
+            /* if the bottom switch is pressed (note: reversed sensing) */
+            if(!bottom_switch.isPressed())
             {
-                motor.setTargetPosition(5);
-                motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                sleep(500);
+                /* stop the movement */
+                power = 0.0;
+
+                /* if this is the first pass for this switch press cycle */
+                if(!cycleStarted)
+                {
+                    /* mark the cycle started and reset the encoder */
+                    cycleStarted = TRUE;
+                    motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    motor.setTargetPosition(0);
+                }
+                /* else:
+                 * If the switch press cycle has already been started, then
+                 * there is no need to keep resetting the encoder while
+                 * the switch remains pressed.
+                 */
+
             }
 
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            position = motor.getCurrentPosition();
-            motor.setTargetPosition(position);
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            last_position = top_stop;
-            resetCycleStart = Boolean.FALSE;
-        }
-        else
-        {
-            resetCycleStart = Boolean.TRUE;
+            /* if the bottom switch has not been pressed,
+             * but down is still being commanded by the operator
+             */
+            else
+            {
+                /* continue moving down slowly */
+                power = -0.2;
+                cycleStarted = FALSE;
+            }
         }
 
         // Check the Hold Condition (power level < 0.1)
         if (abs(power) > .1) {
             // If Operator is commanding a change in the lift
             // position, disable the encoder hold operation,
-            // move the lift, and track the new hold position.
+            // move the lift, and track the new hold position
+            // as the target position.
 
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motor.setPower(power);
             position = motor.getCurrentPosition();
             motor.setTargetPosition(position);
+            if (power > .1)
+            {
+                cycleStarted = FALSE;
+            }
         } else {
             // If Operator is not commanding a change in the
             // lift position, engage the encoder hold operation
@@ -244,10 +223,7 @@ public class Viper_Lift_w_Stop_Linear_TeleOp extends LinearOpMode {
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
 
-        returnSettings = new Setter(position, resetCycleStart, last_position);
-
-        return returnSettings;
+        return cycleStarted;
     } // end method motor_PowerNHold()
 
 }
-
