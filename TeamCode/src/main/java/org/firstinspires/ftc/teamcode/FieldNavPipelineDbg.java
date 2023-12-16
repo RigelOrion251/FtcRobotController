@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
@@ -43,8 +42,9 @@ public class FieldNavPipelineDbg extends OpenCvPipeline {
     Point tempPoint = new Point();
     double[] colors = new double[3];
     Scalar tempScalar = new Scalar(colors);
-    Mat ref01Image = new Mat();
-
+    Mat ref01Image;
+    Mat refLeftImage;
+    Size scaleSize = new Size(320,240);
     enum Stage
     {
         GRAY,
@@ -60,7 +60,17 @@ public class FieldNavPipelineDbg extends OpenCvPipeline {
 
     FieldNavPipelineDbg()
     {
+        ref01Image = new Mat();
         ref01Image = Imgcodecs.imread("sdcard/FIRST/MyPictures/first_pic.jpg");
+        refLeftImage = new Mat();
+        refLeftImage = ref01Image.clone();
+        int interpolation = Imgproc.INTER_AREA;
+ //       Imgproc.resize(ref01Image,
+//                refLeftImage,
+//                scaleSize,
+//                0.0,
+//                0.0,
+//                interpolation);
     }
     @Override
     public void onViewportTapped()
@@ -146,7 +156,7 @@ public class FieldNavPipelineDbg extends OpenCvPipeline {
 
             default:
             {
-                return ref01Image;
+                return refLeftImage;
             }
         }
     }
