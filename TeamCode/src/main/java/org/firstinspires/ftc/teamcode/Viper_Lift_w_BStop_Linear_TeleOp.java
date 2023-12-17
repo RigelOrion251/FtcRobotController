@@ -117,7 +117,7 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
 
 
             int top_stop = 3200;
-            int bottom_stop = 450;
+            int bottom_stop = 1000;
             position = motor_setPowerNHold
             (
                 lift,
@@ -182,6 +182,7 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
             power = 0.0;
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setTargetPosition(0);
+            position = 0;
         }
             /* if the bottom switch has not been pressed,
              * but down is still being commanded by the operator
