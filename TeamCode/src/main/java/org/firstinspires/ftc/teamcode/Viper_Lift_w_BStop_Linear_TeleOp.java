@@ -60,7 +60,6 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
     // Declare OpMode members.
     private final ElapsedTime runtime = new ElapsedTime();
     private int position = 0;
-    private boolean cycleStarted = FALSE;
 
     @Override
     public void runOpMode() {
@@ -116,23 +115,28 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
                 lift.setTargetPosition(position);
             }
 
-            int top_stop = 3400;
-            int bottom_stop = 50;
-            cycleStarted = motor_setPowerNHold
+
+            int top_stop = 3200;
+            int bottom_stop = 450;
+            position = motor_setPowerNHold
             (
                 lift,
                 liftPower,
-                cycleStarted,
+                position,
                 bottom_set_switch,
                 top_stop,
                 bottom_stop
             );
-            position = lift.getCurrentPosition();
 
             // Show the elapsed game time and lift power and position.
             telemetry.addData("Status", "Run Time: " + runtime);
-            RobotLog.d("%f, %f, %d", runtime.milliseconds(), liftPower, position);
-            telemetry.addData("Motors", "test (%.2f)", liftPower);
+            RobotLog.d("%f, %f, %d, %f",
+                    runtime.milliseconds(),
+                    liftPower,
+                    position,
+                    bottom_set_switch.getValue());
+            telemetry.addData("Motors", "Lift Power (%.2f) bottom? (%b)", liftPower,
+                    bottom_set_switch.isPressed());
 
             // Push telemetry to the Driver Station.
             telemetry.update();
@@ -142,7 +146,7 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
     /**
      * Add Power or Hold a motor in a position.
      */
-    private boolean motor_setPowerNHold(DcMotor motor, double power, boolean cycleStarted, TouchSensor bottom_switch, int top_stop, int bottom_stop)
+    private int motor_setPowerNHold(DcMotor motor, double power, int position, TouchSensor bottom_switch, int top_stop, int bottom_stop)
     {
         // Check that the top or bottom stops have not been exceeded
         if
@@ -152,52 +156,47 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
                 &&
                 (power > 0.0)
             )
+ //           ||
+ //           (
+ //               (motor.getCurrentPosition() < bottom_stop)
+ //               &&
+ //               (power < 0.0)
+ //           )
         )
         {
             power = 0.0;
-            cycleStarted = FALSE;
         }
 
         if
         (
             (
-                (motor.getCurrentPosition() < bottom_stop)
+                (!bottom_switch.isPressed())
+                &&
+                (position < bottom_stop)
                 &&
                 (power < 0.0)
             )
         )
         {
-            /* if the bottom switch is pressed (note: reversed sensing) */
-            if(!bottom_switch.isPressed())
-            {
-                /* stop the movement */
-                power = 0.0;
-
-                /* if this is the first pass for this switch press cycle */
-                if(!cycleStarted)
-                {
-                    /* mark the cycle started and reset the encoder */
-                    cycleStarted = TRUE;
-                    motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    motor.setTargetPosition(0);
-                }
-                /* else:
-                 * If the switch press cycle has already been started, then
-                 * there is no need to keep resetting the encoder while
-                 * the switch remains pressed.
-                 */
-
-            }
-
+           /* if this is the first pass for this switch press cycle */
+            power = 0.0;
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            motor.setTargetPosition(0);
+        }
             /* if the bottom switch has not been pressed,
              * but down is still being commanded by the operator
              */
-            else
-            {
-                /* continue moving down slowly */
-                power = -0.2;
-                cycleStarted = FALSE;
-            }
+        else if
+        (
+            (position < bottom_stop)
+            &&
+            (power < 0.0)
+            &&
+            (bottom_switch.isPressed())
+        )
+        {
+
+                power = -0.11;
         }
 
         // Check the Hold Condition (power level < 0.1)
@@ -211,19 +210,15 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
             motor.setPower(power);
             position = motor.getCurrentPosition();
             motor.setTargetPosition(position);
-            if (power > .1)
-            {
-                cycleStarted = FALSE;
-            }
         } else {
             // If Operator is not commanding a change in the
             // lift position, engage the encoder hold operation
             // with a strength of 0.2 power level
-            motor.setPower(0.2);
+//            motor.setPower(0.2);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
 
-        return cycleStarted;
+        return position;
     } // end method motor_PowerNHold()
 
 }
