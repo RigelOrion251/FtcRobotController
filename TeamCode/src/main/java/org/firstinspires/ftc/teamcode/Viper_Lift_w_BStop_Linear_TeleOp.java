@@ -78,6 +78,7 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         lift.setDirection(DcMotor.Direction.REVERSE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setTargetPosition(0);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
