@@ -34,6 +34,7 @@ import static java.lang.Math.abs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -68,6 +69,7 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         DcMotor lift = hardwareMap.get(DcMotor.class, "lift_motor");
+        TouchSensor bottom_set_switch = hardwareMap.get(TouchSensor.class, "bottom_touch");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
@@ -85,7 +87,30 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Get power level for the lift and telemetry
-            double liftPower = -gamepad1.left_stick_y;
+            double liftPower = 0.0;
+            if(gamepad1.right_bumper)
+            {
+                if(gamepad1.right_trigger > 0.25)
+                {
+                    if(!bottom_set_switch.isPressed())
+                    {
+                        liftPower = 0.0;
+                        // Reset Encoder
+                        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                        lift.setTargetPosition(0);
+                        position = 0;
+
+                    }
+                    else
+                    {
+                        liftPower = -0.5;
+                    }
+                }
+                else
+                {
+                    liftPower = 0.5;
+                }
+            }
 
             if (gamepad1.dpad_down && gamepad1.y)
             {
@@ -112,7 +137,7 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
             }
 
             int top_stop = 3400;
-            int bottom_stop = 50;
+            int bottom_stop = 0;
             position = motor_setPowerNHold
             (
                 lift,
