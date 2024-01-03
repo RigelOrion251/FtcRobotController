@@ -29,8 +29,6 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static java.lang.Math.abs;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
