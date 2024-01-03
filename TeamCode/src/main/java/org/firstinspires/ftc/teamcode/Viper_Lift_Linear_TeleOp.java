@@ -138,7 +138,7 @@ public class Viper_Lift_Linear_TeleOp extends LinearOpMode {
             }
 
             int top_stop = 3400;
-            int bottom_stop = 0;
+            int bottom_stop = 10;
             position = motor_setPowerNHold
             (
                 lift,

@@ -120,7 +120,7 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
 
 
             int top_stop = 3200;
-            int bottom_stop = 1000;
+            int bottom_slow = 1000;
             position = motor_setPowerNHold
             (
                 lift,
@@ -128,7 +128,7 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
                 position,
                 bottom_set_switch,
                 top_stop,
-                bottom_stop
+                bottom_slow
             );
 
             // Show the elapsed game time and lift power and position.
@@ -149,9 +149,16 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
     /**
      * Add Power or Hold a motor in a position.
      */
-    private int motor_setPowerNHold(DcMotor motor, double power, int position, TouchSensor bottom_switch, int top_stop, int bottom_stop)
+    private int motor_setPowerNHold
+    (
+            DcMotor motor,
+            double power,
+            int position,
+            TouchSensor bottom_switch,
+            int top_stop,
+            int bottom_stop)
     {
-        // Check that the top or bottom stops have not been exceeded
+        // Check that the top stop has not been exceeded
         if
         (
             (
@@ -159,12 +166,6 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
                 &&
                 (power > 0.0)
             )
- //           ||
- //           (
- //               (motor.getCurrentPosition() < bottom_stop)
- //               &&
- //               (power < 0.0)
- //           )
         )
         {
             power = 0.0;
@@ -174,8 +175,6 @@ public class Viper_Lift_w_BStop_Linear_TeleOp extends LinearOpMode {
         (
             (
                 (!bottom_switch.isPressed())
-                &&
-                (position < bottom_stop)
                 &&
                 (power < 0.0)
             )
